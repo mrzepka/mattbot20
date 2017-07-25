@@ -6,6 +6,10 @@ var bodyparser = require('body-parser');
 var http = require('http');
 var app = express();
 
+//local files
+var slack_req = require('./slack_requests.js');
+var message_tools = require('./message_tools.js');
+
 //define port to listen to
 const PORT=4390;
 
@@ -13,6 +17,8 @@ var clientID = process.env.ID;
 var clientSecret = process.env.SECRET;
 var botID = process.env.BOT_TOKEN;
 
+//don't want to reply to messages we've replied to already
+var replied_to = [];
 app.use(bodyparser.json());
 
 app.listen(PORT, function() {
@@ -36,18 +42,7 @@ app.get('/oauth', function(req, res) {
 
     //Do a call to the Slack 'oauth.access' endpoint
     //Pass client ID, Secret and the code we just got
-    request({
-      url: 'https://slack.com/api/oauth.access', //url to hit
-      qa: {code: req.query.code, client_id: clientID, client_secret: clientSecret}, //query string
-      method: 'GET', //Specify the method
-    }, function(error, res, body) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('authorized');
-        res.json(body);
-      }
-    });
+    console.log(typeof slack_req.make_oauth_request(req, clientID, clientSecret));
   }
 });
 
@@ -59,25 +54,20 @@ app.post('/command', function(req, res) {
 });
 
 app.post('/event', function(req, res) {
-  console.log('event triggered...');
-  console.log(req.body);
   var channel = 'C69BR6TK3';
   var message = 'we got an event!';
   var apiUrl = 'https://slack.com/api/chat.postMessage?token=' + botID + '&channel='
     + channel + '&text=' + message;
-  console.log(req.body.event.username);
+
+  console.log(req.body.event.user);
   
-  /*request({
-    url: apiUrl,
-    method: 'POST'
-  }, function(error, res, body) {
-    console.log(res.body);
-    console.log(res.body.error);
-    if (res.body.error) {
-      console.log(res.body.error);
-    } else {
-      console.log('yay');
-      // res.json(body);
-    }
-  });*/
+  var userinfo = slack_req.get_user_info(botID, req.body.event.user);
+  var reqMsg = req.body.event.text;
+  
+  if(req.body.event.user != 'mattbot20' && replied_to.indexOf(req.body.event_id) === -1){
+    //slack_req.make_send_postMessage_request(botID, channel, message);
+    console.log(message_tools.generate_response(userinfo, reqMsg));
+    replied_to.push(req.body.event_id);
+    console.log('Replied to: ' + replied_to);
+  }
 });
