@@ -61,13 +61,14 @@ app.post('/command', function(req, res) {
 app.post('/event', function(req, res) {
   console.log('event triggered...');
   console.log(req.body);
-  request({
-    url: 'https://slack.com/api/chat.postMessage',
-    qa: {
-      token: botID,
-      channel: 'C69BR6TK3',
-      text: 'we got an event!'
-    },
+  var channel = 'C69BR6TK3';
+  var message = 'we got an event!';
+  var apiUrl = 'https://slack.com/api/chat.postMessage?token=' + botID + '&channel='
+    + channel + '&text=' + message;
+  console.log(req.body.event.username);
+  
+  /*request({
+    url: apiUrl,
     method: 'POST'
   }, function(error, res, body) {
     console.log(res.body);
@@ -78,5 +79,5 @@ app.post('/event', function(req, res) {
       console.log('yay');
       // res.json(body);
     }
-  });
+  });*/
 });
