@@ -1,0 +1,17 @@
+{
+  "name": "mattbot20",
+  "version": "1.0.0",
+  "description": "A slack bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matt Rzepka",
+  "license": "ISC",
+  "dependencies": {
+    "express": "*",
+    "request": "*",
+    "dotenv": "*",
+    "body-parser": "*"
+  }
+}
